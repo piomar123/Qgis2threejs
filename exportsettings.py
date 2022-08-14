@@ -17,7 +17,7 @@ from .mapextent import MapExtent
 from .pluginmanager import pluginManager
 from .q3dcore import MapTo3D, Layer, GDALDEMProvider, FlatDEMProvider, calculateGridSegments, layerTypeFromMapLayer, urlFromPCLayer
 from .q3dconst import ATConst, LayerType
-from .tools import createUid, getLayersInProject, getTemplateConfig, logMessage, parseFloat, settingsFilePath
+from .tools import createUid, getLayerNodesInProject, getTemplateConfig, logMessage, parseFloat, settingsFilePath
 
 
 class ExportSettings:
@@ -305,7 +305,8 @@ class ExportSettings:
         layers = [lyr for lyr in self.layers() if lyr.layerId.startswith("pc:")]
 
         # DEM, vector and point cloud layers in QGIS project
-        for mapLayer in getLayersInProject():
+        for mapLayerNode in getLayerNodesInProject():
+            mapLayer = mapLayerNode.layer()
             layerType = layerTypeFromMapLayer(mapLayer)
             if layerType is None:
                 continue
@@ -314,12 +315,13 @@ class ExportSettings:
             if layer:
                 # update layer and layer name
                 layer.mapLayer = mapLayer
-                layer.name = layer.properties.get("lineEdit_Name") or mapLayer.name()
+                layer.name = layer.properties.get("lineEdit_Name") or self.getNestedName(mapLayerNode)
 
                 if layerType == LayerType.POINTCLOUD:
                     layer.properties["url"] = urlFromPCLayer(mapLayer)     # update url
             else:
                 layer = Layer.fromQgsMapLayer(mapLayer)
+                layer.name = self.getNestedName(mapLayerNode)
             layers.append(layer)
 
         # DEM provider plugin layers
@@ -349,6 +351,14 @@ class ExportSettings:
             self.nextJsLayerId += 1
 
         self.data[ExportSettings.LAYERS] = layers
+
+    def getNestedName(self, layerNode):
+        path = layerNode.name()
+        parent = layerNode.parent()
+        while parent and parent.name():
+            path = parent.name() + "/" + path
+            parent = parent.parent()
+        return path
 
     def getLayer(self, layerId):
         if layerId:

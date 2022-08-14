@@ -27,6 +27,10 @@ def getLayersInProject():
     return layers
 
 
+def getLayerNodesInProject():
+    return [node for node in QgsProject.instance().layerTreeRoot().findLayers() if node.layer()]
+
+
 def getDEMLayersInProject():
     layers = []
     for layer in getLayersInProject():
