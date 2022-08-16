@@ -57,6 +57,7 @@
     </widget>
     <addaction name="actionSceneSettings"/>
     <addaction name="menuLayer"/>
+    <addaction name="actionLayersVisibility"/>
     <addaction name="separator"/>
     <addaction name="actionReload"/>
    </widget>
@@ -286,6 +287,11 @@
    </property>
    <property name="text">
     <string>Orthographic</string>
+   </property>
+  </action>
+  <action name="actionLayersVisibility">
+   <property name="text">
+    <string>Apply layers visibility from project</string>
    </property>
   </action>
   <action name="actionReload">

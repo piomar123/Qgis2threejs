@@ -222,6 +222,7 @@ class Q3DWindow(QMainWindow):
         self.ui.actionHeaderFooterLabel.triggered.connect(self.showHFLabelDialog)
         self.ui.actionResetCameraPosition.triggered.connect(self.ui.webView.resetCameraState)
         self.ui.actionReload.triggered.connect(self.ui.webView.reloadPage)
+        self.ui.actionLayersVisibility.triggered.connect(self.setLayersVisibilityFromProject)
         self.ui.actionAlwaysOnTop.toggled.connect(self.alwaysOnTopToggled)
         self.ui.actionUsage.triggered.connect(self.usage)
         self.ui.actionHelp.triggered.connect(self.help)
@@ -499,6 +500,12 @@ class Q3DWindow(QMainWindow):
         layer = Layer(layerId, name, LayerType.POINTCLOUD, properties, visible=True)
         self.iface.layerAdded.emit(layer)
         self.ui.treeView.addLayer(layer)
+
+    def setLayersVisibilityFromProject(self):
+        for qgsLayerNode in QgsProject.instance().layerTreeRoot().findLayers():
+            uiItem = self.ui.treeView.itemFromLayerId(qgsLayerNode.layer().id())
+            if uiItem:
+                uiItem.setCheckState(Qt.Checked if qgsLayerNode.isVisible() else Qt.Unchecked)
 
     # View menu
     def cameraChanged(self, action):
